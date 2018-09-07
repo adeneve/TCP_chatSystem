@@ -7,7 +7,7 @@ HEADERS = chat_server.h chat_client.h
 
 servermake: chat_server.o chat_client.o
 	$(CC) -o chat_server chat_server.o -lpthread
-	$(CC) -o chat_client chat_client.o
+	$(CC) -o chat_client chat_client.o -lpthread
 
 all: clientmake servermake
 

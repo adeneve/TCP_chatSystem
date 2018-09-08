@@ -18,6 +18,7 @@ int main(int argc, char* argv[]){
 
 	memset(clients, 0 ,10);
 	sem_init(&mutex, 0 ,1);
+	int clientCount = 0;
 
 	int servSock;
 	
@@ -34,12 +35,14 @@ int main(int argc, char* argv[]){
 	}
 	fprintf(stdout, "server startup complete. \n");
 	fflush(stdout);
+	int clientSock1;
+	int clientSock2;
 	while(1){
 		//listen for a connection
 		struct sockaddr clientAddr;
 		int clntLen = sizeof(clientAddr);
-		int clientSock;
-		if((clientSock=accept(servSock, (struct sockaddr*)&clientAddr,&clntLen)) < 0){
+		if(clientCount == 0){
+		if((clientSock1=accept(servSock, (struct sockaddr*)&clientAddr,&clntLen)) < 0){
 			printf("problem with accept()");
 			fflush(stdout);
 			return 1;
@@ -47,10 +50,27 @@ int main(int argc, char* argv[]){
 		//handle the connection in a separate thread
 		pthread_t connectionThread;
 		printf("starting new connection thread\n");
-		pthread_create(&connectionThread, NULL, handleConnection, (void*) &clientSock);
+		pthread_create(&connectionThread, NULL, handleConnection, (void*) &clientSock1);
 		pthread_detach(connectionThread);
 		fflush(stdout);
-		saveClient(clientSock);
+		saveClient(clientSock1);
+		}
+		if(clientCount == 1){
+	if((clientSock2=accept(servSock, (struct sockaddr*)&clientAddr,&clntLen)) < 0){
+			printf("problem with accept()");
+			fflush(stdout);
+			return 1;
+		}
+		//handle the connection in a separate thread
+		pthread_t connectionThread;
+		printf("starting new connection thread\n");
+		pthread_create(&connectionThread, NULL, handleConnection, (void*) &clientSock2);
+		pthread_detach(connectionThread);
+		fflush(stdout);
+		saveClient(clientSock2);
+
+		}
+		clientCount++;
 
 	}
 
@@ -76,9 +96,11 @@ void *handleConnection(void* clientSocket)
 	char buffer [50];
 	char name [50];
 	while(1){
+		printf("waiting for message from %d ...\n", *clientSock);
 		int recvsize = recv(*clientSock, buffer, 50, 0);
 		if(recvsize == 0) break;
 		printf("message from %s :", buffer);
+		fflush(stdout);
 		memcpy(name, buffer, 50);
 		memset(buffer, 0, 50);
 		recvsize = recv(*clientSock, buffer, 50, 0);

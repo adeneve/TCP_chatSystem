@@ -105,8 +105,12 @@ int broadcast(char *buffer, char* name){
 	for(int i = 0; i < 10; i++){
 		if(clients[i] != 0){
 			printf("name is %s \n", name);
-			send(clients[i], name, strlen(name), 0);
-			send(clients[i], buffer, strlen(buffer), 0);
+			if(send(clients[i], name, strlen(name), 0) < 0){
+				printf("send error");
+			}
+			if(send(clients[i], buffer, strlen(buffer), 0)< 0){
+				printf("send error");
+			}
 		}
 	}
 	//up semaphore

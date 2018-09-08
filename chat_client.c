@@ -61,7 +61,7 @@ int main(int argc, char* argv []){
 			return 1;
 		}
 		//recv(clientSock, buffer, 50, 0);
-		//printf("%s \n", buffer);
+		printf("messages sent");
 		fflush(stdout);
 	}
 	return 0;

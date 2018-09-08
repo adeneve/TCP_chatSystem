@@ -101,7 +101,7 @@ int broadcast(char *buffer, char* name){
 	//in a database to be queried by the clients later on.
 	//in other words, this is a stateless chat system, nothing gets saved to disk
 	//down semaphore - make sure broadcasts don't overlap
-	sem_wait(&mutex);
+	//sem_wait(&mutex);
 	for(int i = 0; i < 10; i++){
 		if(clients[i] != 0){
 			printf("name is %s \n", name);
@@ -110,7 +110,7 @@ int broadcast(char *buffer, char* name){
 		}
 	}
 	//up semaphore
-	sem_post(&mutex);
+	//sem_post(&mutex);
  return 0;
 }
 

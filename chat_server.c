@@ -90,6 +90,7 @@ void *handleConnection(void* clientSocket)
 		memset(buffer, 0, 50);
 	}
 	printf("connection closed\n");
+	close(*clientSock);
 	removeClient(*clientSock);
  //handle client connection with this thread function
 }

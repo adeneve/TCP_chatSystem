@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -std=c99
 CFLAGS=-I.
 HEADERS = chat_server.h chat_client.h
 

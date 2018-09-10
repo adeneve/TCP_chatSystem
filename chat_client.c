@@ -6,6 +6,7 @@
 pthread_t receiverThread;
 void* receiverFun(void* clientSock);
 
+
 int main(int argc, char* argv []){
 
 	int clientSock = socket(AF_INET, SOCK_STREAM, 0);
@@ -52,16 +53,15 @@ int main(int argc, char* argv []){
 		buffer[counter] = '\0';
 		counter=0;
 		int strlength = strlen(buffer);
-		if(send(clientSock, name, strlen(name), 0) < 0){
+		if(send(clientSock, name, 20, 0) < 0){
 			printf("send error");
 			return 1;
 		}
-		if(send(clientSock, buffer, strlength, 0) < 0){
+		if(send(clientSock, buffer, 50, 0) < 0){
 			printf("send error");
 			return 1;
 		}
 		//recv(clientSock, buffer, 50, 0);
-		printf("message sent");
 		fflush(stdout);
 	}
 	return 0;
@@ -80,6 +80,8 @@ void* receiverFun(void* clientSock){
 	  recvsize = recv(*(int*)clientSock, buffer, 50, 0);
 	  if(recvsize == 0) break;
 	  printf(" %s \n", buffer);
+		printf("> ");
+		fflush(stdout);
 	  memset(buffer,0,50);
 
 	}

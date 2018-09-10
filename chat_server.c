@@ -3,11 +3,11 @@
 #include <semaphore.h>
 #include "chat_server.h"
 
-#define MAXQUEUE 50
+#define MAXQUEUE 10
 
 void *handleConnection( void* clientSock);
 int broadcast(char* buffer, char* name);
-void saveClient(int sock);
+int saveClient(int sock);
 void removeClient(int sock);
 
 int clients[10];
@@ -35,41 +35,31 @@ int main(int argc, char* argv[]){
 	}
 	fprintf(stdout, "server startup complete. \n");
 	fflush(stdout);
-	int clientSock1;
-	int clientSock2;
+	int clientSock;
+
 	while(1){
 		//listen for a connection
 		struct sockaddr clientAddr;
 		int clntLen = sizeof(clientAddr);
-		if(clientCount == 0){
-		if((clientSock1=accept(servSock, (struct sockaddr*)&clientAddr,&clntLen)) < 0){
+		if(clientCount == 10){
+			printf("max connections reached");
+			usleep(200000); // sleep 200ms
+			continue;
+		}
+		if((clientSock=accept(servSock, (struct sockaddr*)&clientAddr,&clntLen)) < 0){
 			printf("problem with accept()");
 			fflush(stdout);
 			return 1;
 		}
+		//find available slot in client array
+		int slotNum = saveClient(clientSock);
 		//handle the connection in a separate thread
 		pthread_t connectionThread;
 		printf("starting new connection thread\n");
-		pthread_create(&connectionThread, NULL, handleConnection, (void*) &clientSock1);
+		pthread_create(&connectionThread, NULL, handleConnection, (void*) &clients[slotNum]);
 		pthread_detach(connectionThread);
 		fflush(stdout);
-		saveClient(clientSock1);
-		}
-		if(clientCount == 1){
-	if((clientSock2=accept(servSock, (struct sockaddr*)&clientAddr,&clntLen)) < 0){
-			printf("problem with accept()");
-			fflush(stdout);
-			return 1;
-		}
-		//handle the connection in a separate thread
-		pthread_t connectionThread;
-		printf("starting new connection thread\n");
-		pthread_create(&connectionThread, NULL, handleConnection, (void*) &clientSock2);
-		pthread_detach(connectionThread);
-		fflush(stdout);
-		saveClient(clientSock2);
 
-		}
 		clientCount++;
 
 	}
@@ -101,7 +91,7 @@ void *handleConnection(void* clientSocket)
 		if(recvsize == 0) break;
 		printf("message from %s :", buffer);
 		fflush(stdout);
-		memcpy(name, buffer, 50);
+		memcpy(name, buffer, 20);
 		memset(buffer, 0, 50);
 		recvsize = recv(*clientSock, buffer, 50, 0);
 		if(recvsize == 0) break;
@@ -123,7 +113,7 @@ int broadcast(char *buffer, char* name){
 	//in a database to be queried by the clients later on.
 	//in other words, this is a stateless chat system, nothing gets saved to disk
 	//down semaphore - make sure broadcasts don't overlap
-	//sem_wait(&mutex);
+	sem_wait(&mutex);
 	for(int i = 0; i < 10; i++){
 		if(clients[i] != 0){
 			printf("name is %s \n", name);
@@ -136,17 +126,19 @@ int broadcast(char *buffer, char* name){
 		}
 	}
 	//up semaphore
-	//sem_post(&mutex);
+	sem_post(&mutex);
  return 0;
 }
 
-void saveClient( int clientSock ){
+int saveClient( int clientSock ){
 
 	int i;
 	for(i = 0; i < 10; i++){
 		if(clients[i] == 0) break;
 	}
 	clients[i] = clientSock;
+
+	return i;
 }
 
 void removeClient(int clientSock){
@@ -155,4 +147,5 @@ void removeClient(int clientSock){
 		if(clients[i] == clientSock) break;
 	}
 	clients[i] = 0;
+	clientCount--;
 }

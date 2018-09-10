@@ -21,11 +21,11 @@ int main(int argc, char* argv[]){
 	int clientCount = 0;
 
 	int servSock;
-	
+
 	if((servSock = socket(PF_INET, SOCK_STREAM, 0)) < 0 ){
 		printf("failed to create server socket");
 	}
-	
+
 	if(bind_TCPserver_sock(servSock, 1234, AF_INET) == -1){
 		printf("failed to bind sock");
 	}
@@ -94,10 +94,10 @@ void *handleConnection(void* clientSocket)
 	fflush(stdout);
 	int* clientSock = (int*) clientSocket;
 	char buffer [50];
-	char name [50];
+	char name [20];
 	while(1){
 		printf("waiting for message from %d ...\n", *clientSock);
-		int recvsize = recv(*clientSock, buffer, 50, 0);
+		int recvsize = recv(*clientSock, buffer, 20, 0);
 		if(recvsize == 0) break;
 		printf("message from %s :", buffer);
 		fflush(stdout);
@@ -127,10 +127,10 @@ int broadcast(char *buffer, char* name){
 	for(int i = 0; i < 10; i++){
 		if(clients[i] != 0){
 			printf("name is %s \n", name);
-			if(send(clients[i], name, strlen(name), 0) < 0){
+			if(send(clients[i], name, 20, 0) < 0){
 				printf("send error");
 			}
-			if(send(clients[i], buffer, strlen(buffer), 0)< 0){
+			if(send(clients[i], buffer, 50, 0)< 0){
 				printf("send error");
 			}
 		}

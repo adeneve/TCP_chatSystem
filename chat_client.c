@@ -11,7 +11,7 @@ int main(int argc, char* argv []){
 	int clientSock = socket(AF_INET, SOCK_STREAM, 0);
 	struct sockaddr_in serverAddr;
 	serverAddr.sin_family = AF_INET;
-	const char* serverIP = "23.242.190.195";
+	const char* serverIP = "127.0.0.1";
 	serverAddr.sin_addr.s_addr = inet_addr(serverIP);
 	serverAddr.sin_port = htons(1234);
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv []){
 	//start a reciever thread
 	printf("starting receiver thread\n");
 	pthread_create(&receiverThread, NULL, receiverFun, (void*)&clientSock);
-        pthread_detach(receiverThread);	
+        pthread_detach(receiverThread);
 
 	char buffer[50];
 	char name[20];
@@ -35,7 +35,7 @@ int main(int argc, char* argv []){
 	int counter = 0;
 	char nextC;
 	while(1){
-		
+
 		//scanf("%s", buffer);
 		//use a semaphore here for nicer printing
 		printf("> ");
@@ -61,7 +61,7 @@ int main(int argc, char* argv []){
 			return 1;
 		}
 		//recv(clientSock, buffer, 50, 0);
-		printf("messages sent");
+		printf("message sent");
 		fflush(stdout);
 	}
 	return 0;
@@ -73,7 +73,7 @@ void* receiverFun(void* clientSock){
 	char buffer [50];
 	while(1){
 
-	  int recvsize = recv(*(int*)clientSock, buffer, 50, 0);
+	  int recvsize = recv(*(int*)clientSock, buffer, 20, 0);
 	  if(recvsize == 0) break;
 	  printf("message from server - %s : ", buffer);
 	  memset(buffer, 0 ,50);
